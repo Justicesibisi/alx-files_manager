@@ -12,14 +12,14 @@ class AuthController {
     }
 
     const base64Credentials = authHeader.split(' ')[1];
-    const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-    const [email, password] = credentials.split(':');
+    const decoded = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+    const [email, password] = decoded.split(':');
 
     if (!email || !password) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const hashedPassword = sha1(password);
+    const hashedPassword = sha1(password); // Keep this declaration only once
     const usersCollection = dbClient.db.collection('users');
     const user = await usersCollection.findOne({ email, password: hashedPassword });
 
