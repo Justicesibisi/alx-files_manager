@@ -1,33 +1,35 @@
-import express from 'express';
-import AppController from '../controllers/AppController.js';
+/* eslint-disable no-unused-vars */
+import { Express } from 'express';
+import AppController from '../controllers/AppController';
 import UsersController from '../controllers/UsersController';
 import AuthController from '../controllers/AuthController';
 import FilesController from '../controllers/FilesController';
+import { authenticateUser } from '../middlewares/auth';
+import { handleError } from '../helper/errorHandler';
 
-// Create the router instance
-const router = express.Router();
+const router = (api) => {
+  // Status and Stats
+  api.get('/status', AppController.getStatus);
+  api.get('/stats', AppController.getStats);
 
+  // Users
+  api.post('/users', UsersController.postNew);
+  api.get('/users/me', UsersController.getMe);
 
-router.get('/status', AppController.getStatus);
+  // Authentication
+  api.get('/connect', AuthController.getConnect);
+  api.get('/disconnect', AuthController.getDisconnect);
 
-router.get('/stats', AppController.getStats);
+  // Files
+  api.post('/files', authenticateUser, FilesController.postUpload);
+  api.get('/files/:id', authenticateUser, FilesController.getShow);
+  api.get('/files', authenticateUser, FilesController.getIndex);
+  api.get('/files/:id/data', FilesController.getFile);
 
-router.post('/users', UsersController.postNew);
+  api.put('/files/:id/publish', authenticateUser, FilesController.putPublish);
+  api.put('/files/:id/unpublish', authenticateUser, FilesController.putUnpublish);
 
-router.get('/connect', AuthController.getConnect);
-
-router.get('/disconnect', AuthController.getDisconnect);
-
-router.get('/users/me', UsersController.getMe);
-
-router.post('/files', FilesController.postUpload);
-
-router.put('/files/:id/publish', FilesController.putPublish);
-
-router.put('/files/:id/unpublish', FilesController.putUnpublish);
-
-router.get('/files/:id/data', FilesController.getFile);
-
+  api.use(handleError);
+};
 
 export default router;
-
